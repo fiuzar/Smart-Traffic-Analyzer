@@ -36,24 +36,6 @@ Returns congestion snapshot for a specific road.
 #### `GET /traffic/roads`
 List all monitored roads.
 
-**Response Example**  
-```json
-[{
-  "road_id": "LAG-EXP-001",
-  "timestamp": "2025-09-04T06:00:00Z",
-  "avg_speed_kph": 23.5,
-  "vehicle_count": 124,
-  "congestion_score": 0.78
-},
-{
-  "road_id": "LAG-EXP-002",
-  "timestamp": "2025-09-05T06:00:00Z",
-  "avg_speed_kph": 63.5,
-  "vehicle_count": 100,
-  "congestion_score": 0.76
-},]
-```
-
 #### `POST /traffic/roads`
 Register a new monitored road/stream.
 
@@ -74,24 +56,36 @@ Remove a monitored road (stop ingestion).
 
 ### Alert Management API
 
-- `POST /traffic/alerts`:
-- `GET /traffic/alerts`:
-    List all active subscriptions.
-- `PUT /traffic/alerts/{alert_id}`:
-    Update threshold conditions.
-- `DELETE /traffic/alerts/{alert_id}`:
-    Delete an alert subscription.
+#### POST /traffic/alerts`
+Create a new congestion alert subscription.
 
-**System Health API**
+#### `GET /traffic/alerts`:
+List all active subscriptions.
 
-- `GET /system/health`:
-- `GET /system/metrics`:
+#### `PUT /traffic/alerts/{alert_id}`:
+Update threshold conditions for an alert
 
-** Model Management API**
+### `DELETE /traffic/alerts/{alert_id}`:
+Delete an alert subscription.
 
-- `GET /model/version`:
-- `POST /model/reload`:
-- `POST /model/upload`:
-    Create a new model version by uploading weights.
-- `DELETE /model/version/{version_id}`
-    Delete an old model version (if multiple are stored).
+### System Health API
+
+#### `GET /system/health`
+Returns uptime, model load time, GPU/CPU utilization.
+
+#### `GET /system/metrics`
+Returns Prometheus-compatible metrics (latency, FPS, inference errors).
+
+### Model Management API
+
+#### `GET /model/version`
+Returns model name, version, and date deployed.
+
+#### `POST /model/reload`
+Hot reload updated weights.
+
+#### `POST /model/upload`
+Upload a new model version.
+
+#### `DELETE /model/version/{version_id}`
+Delete an old model version (if multiple are stored).
