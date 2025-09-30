@@ -4,3 +4,4 @@ pydantic
 fastapi
 opencv-python-headless
 onnxruntime
+python-multipart
