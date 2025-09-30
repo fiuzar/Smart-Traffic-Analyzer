@@ -27,6 +27,6 @@ async def count_vehicles(request: Request, file: UploadFile = File(...)):
 
     vehicle_classes = {2, 3, 4, 5}
 
-    vehicle_detection = [d for d in detections if d['class_id'] in vehicle_classes]
+    vehicle_detection = [d for d in detections if d['class'] in vehicle_classes]
 
     return {"vehicle_count": len(vehicle_detection), "detections": vehicle_detection}

@@ -24,8 +24,7 @@ def load_onnx_model(model_path: str, use_gpu: bool = False) -> ort.InferenceSess
     session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
     session = ort.InferenceSession(model_path, sess_options=session_options, providers=providers)
-    print(f"Model loaded successfully: {model_path}, (Providers: {session.get_providers()})")
-
+    
     return session
 
 def load_detection_model(model_path: str = None, use_gpu: bool = False) -> ort.InferenceSession:

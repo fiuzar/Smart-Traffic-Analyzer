@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from contextlib import asynccontextmanager
 import onnxruntime as ort
+import base64
 
 # segementation_session: ort.InferenceSession = None
 
@@ -29,15 +30,19 @@ async def segment_image(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid image file")
     
     segmentation_session = request.app.state.segmentation_session
+
     # Preprocess image
     mask = run_segmentation(segmentation_session, image)
     overlay = apply_mask_to_image(image, mask)
 
     # Encode image to send back
     _, img_encoded = cv2.imencode('.png', overlay)
-    img_bytes = img_encoded.tobytes()
+    img_bytes = img_encoded.tobytes()  
+
+    img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+    
     return {
         "filename": file.filename,
         "content_type": file.content_type,
-        "segmented_image": img_bytes
+        "segmented_image": img_base64
     }

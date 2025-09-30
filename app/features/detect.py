@@ -51,27 +51,27 @@ def run_detections(session: ort.InferenceSession, input_image: np.ndarray, conf_
         y2 = int((y + h / 2) * input_image.shape[0])
 
         detections.append({"box": [x1, y1, x2, y2], "score": float(conf), "class": int(class_id)})
-
+    
     return detections
 
-def draw_boxes(image: np.ndarray, detections: list, class_names = None) -> np.ndarray:
-    
-    """
-    Draw bounding boxes and labels on the image.
-    
-    Args:
-        image (np.ndarray): Original image. (H, W, C)
-        detections (list): List of detections from run_detections.
-        class_names (list): List of class names corresponding to class IDs.
-    """
-    
+def draw_boxes(image, detections):
     for det in detections:
         x1, y1, x2, y2 = det["box"]
         score = det["score"]
         class_id = det["class"]
-        label = f"{class_names[class_id] if class_names else class_names}: {score:.2f}"
 
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 250, 0))
-        cv2.putText(image, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        # Draw bounding box
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-        return image
+        # Label with class + confidence
+        label = f"{class_id}: {score:.2f}"
+        cv2.putText(
+            image,
+            label,
+            (x1, max(y1 - 10, 0)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            2
+        )
+    return image

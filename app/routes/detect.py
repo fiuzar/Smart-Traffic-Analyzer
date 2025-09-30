@@ -1,19 +1,9 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Request
+import base64
+from fastapi import APIRouter, File, UploadFile, Request
 import cv2
 import numpy as np
 from ..features.detect import run_detections, draw_boxes
-# from ..core.model_loader import load_detection_model as detection_session
-from contextlib import asynccontextmanager
 import onnxruntime as ort
-
-# detection_session: ort.InferenceSession = None
-
-# @asynccontextmanager
-# async def lifespan(app: APIRouter):
-#     global detection_session
-#     detection_session = load_detection_model(use_gpu=True)
-#     print("Detection model loaded and ready.")
-#     yield
 
 router = APIRouter()
 
@@ -29,20 +19,19 @@ async def detect_objects(request: Request, file: UploadFile = File(...)):
     if image is None:
         return {"error": "Could not read the image. Please ensure the file is a valid image."}
 
-    detection_session = request.app.state.detection_session
-    boxes, scores, class_ids = run_detections(detection_session, image)
+    detection_session: ort.InferenceSession = request.app.state.detection_session
+    detections = run_detections(detection_session, image)
 
-    annotated_image = draw_boxes(image.copy(), boxes, scores, class_ids)
+    # Draw bounding boxes
+    annotated_image = draw_boxes(image.copy(), detections)
 
+    # Encode image to base64 for JSON-safe transfer
     _, img_encoded = cv2.imencode('.jpg', annotated_image)
-    img_bytes = img_encoded.tobytes()
+    img_base64 = base64.b64encode(img_encoded).decode("utf-8")
 
     return {
         "filename": file.filename,
         "content_type": file.content_type,
-        "detections": [
-            {"box": box.tolist(), "score": float(score), "class_id": int(class_id)}
-            for box, score, class_id in zip(boxes, scores, class_ids)
-        ],
-        "annotated_image": img_bytes
+        "detections": detections,
+        "annotated_image": img_base64  # JSON-safe string
     }

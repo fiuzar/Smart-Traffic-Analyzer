@@ -33,19 +33,28 @@ def run_segmentation(model: ort.InferenceSession, image: np.ndarray) -> np.ndarr
     return mask
 
 
-def apply_mask_to_image(image: np.ndarray, mask: np.ndarray, alpha=0.5, color=(0, 255, 0)) -> np.ndarray:
+def apply_mask_to_image(image: np.ndarray, mask: np.ndarray, alpha: float = 0.5) -> np.ndarray:
     """
-    Overlay the segmentation mask on the original image.
-
-    Args:
-        image (np.ndarray): Original image. (H, W, C)
-        mask (np.ndarray): Segmentation mask. (H, W)
-        alpha (float): Transparency factor for the overlay.
-        color (tuple): Color for the mask overlay.
+    Overlay road segmentation mask on top of the original image.
+    - image: original BGR frame
+    - mask: 2D binary mask (0 = background, 1 = road)
+    - alpha: transparency of overlay
     """
 
-    colored_mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-    colored_mask[:] = color
+    if mask.ndim == 3:
+        mask = mask.squeeze()
 
+    # Resize mask to match image size
+    mask_resized = cv2.resize(mask.astype(np.uint8),
+                              (image.shape[1], image.shape[0]),
+                              interpolation=cv2.INTER_NEAREST)
+
+    # Create colored mask (green for road)
+    road_color = np.array([0, 255, 0], dtype=np.uint8)
+    colored_mask = np.zeros_like(image, dtype=np.uint8)
+    colored_mask[mask_resized == 1] = road_color
+
+    # Blend
     overlay = cv2.addWeighted(image, 1 - alpha, colored_mask, alpha, 0)
+
     return overlay

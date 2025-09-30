@@ -1,0 +1,6 @@
+uvicorn
+aiofiles
+pydantic
+fastapi
+cv2
+onnxruntime
